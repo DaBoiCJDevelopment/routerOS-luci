@@ -1,0 +1,14 @@
+{
+  "luci-app-firmwareupdate": {
+    "description": "Firmware update permissions",
+    "read": {
+      "ubus": {
+        "system": ["board"]
+      }
+    },
+    "write": {
+      "file": [ "/usr/libexec/firmwareupdate/update.sh" ],
+      "ubus": {}
+    }
+  }
+}

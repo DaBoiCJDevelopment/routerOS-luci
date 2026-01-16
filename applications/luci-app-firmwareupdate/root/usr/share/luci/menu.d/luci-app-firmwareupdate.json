@@ -1,0 +1,21 @@
+{
+  "luci-app-firmwareupdate": {
+    "title": "Firmware Updater",
+    "description": "Update firmware from manifest",
+    "order": 90,
+    "depends": {
+      "acl": ["luci-app-firmwareupdate"]
+    }
+  },
+  "luci-app-firmwareupdate/overview": {
+    "title": "Overview",
+    "order": 1,
+    "action": {
+      "type": "view",
+      "path": "firmwareupdate/overview"
+    },
+    "depends": {
+      "acl": ["luci-app-firmwareupdate"]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
 	"admin/system/attendedsysupgrade": {
-		"title": "Attended Sysupgrade",
+		"title": "Update",
 		"order": 60,
 		"action": {
 			"type": "firstchild"

@@ -1,0 +1,85 @@
+<%+header%>
+
+<h2>Firmware Update</h2>
+
+<div id="status">Loading manifest…</div>
+
+<table class="table" id="fwtable" style="display:none">
+  <tr>
+    <th>Version</th>
+    <th>Description</th>
+    <th>Action</th>
+  </tr>
+</table>
+
+<script type="text/javascript">
+const MANIFEST_URL = "http://192.168.8.216:8404/manifest.json";
+
+function getSystemInfo() {
+  return fetch('/cgi-bin/luci/admin/system/routeros/boardinfo')
+    .then(r => r.json());
+}
+
+
+function updateFirmware(imageUrl) {
+  if (!confirm("This will reboot the router. Continue?"))
+    return;
+
+  fetch('/cgi-bin/luci/admin/system/command', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      command: `/usr/libexec/routeros-updater/update.sh ${MANIFEST_URL} ${imageUrl}`
+    })
+  });
+
+  alert("Upgrade started. Router will reboot.");
+}
+
+Promise.all([
+  fetch(MANIFEST_URL).then(r => r.json()),
+  getSystemInfo()
+]).then(([manifest, board]) => {
+
+  const boardName = board.board_name;
+  const target = board.release.target.split('/')[0];
+  const subtarget = board.release.target.split('/')[1];
+
+  const entry =
+    manifest.boards?.[boardName]?.[subtarget]?.[target];
+
+  if (!entry) {
+    document.getElementById('status').innerText =
+      "No firmware available for this device.";
+    return;
+  }
+
+  const table = document.getElementById('fwtable');
+  table.style.display = "";
+
+  Object.entries(entry.versions).forEach(([version, v]) => {
+    const row = document.createElement('tr');
+
+    row.innerHTML = `
+      <td>${version}</td>
+      <td>${v.description}</td>
+      <td>
+        <button class="btn cbi-button-action"
+          onclick="updateFirmware('${v.image.url}')">
+          Update
+        </button>
+      </td>
+    `;
+
+    table.appendChild(row);
+  });
+
+  document.getElementById('status').innerText = "";
+
+}).catch(err => {
+  document.getElementById('status').innerText =
+    "Failed to load manifest.";
+});
+</script>
+
+<%+footer%>
